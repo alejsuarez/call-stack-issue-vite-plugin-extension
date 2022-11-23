@@ -1,0 +1,15 @@
+# dependencies
+**/node_modules
+
+# build
+**/dist
+
+# releases
+**/releases
+
+# etc
+.DS_Store
+.env.local
+.idea
+backup
+
