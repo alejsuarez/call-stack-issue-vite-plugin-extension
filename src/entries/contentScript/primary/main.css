@@ -1,0 +1,35 @@
+.editor {
+  min-width: 162px;
+  max-width: 400px;
+  max-height: 400px;
+  padding: 10px;
+}
+
+.editor > h5 {
+  padding: 5px 5px 0 5px;
+}
+
+.editor-read-view {
+  --webkit-box-flex: 1;
+  flex-grow: 1;
+  overflow: hidden auto;
+  line-height: 20px;
+  padding: 0 5px 0 5px;
+  left: 0;
+}
+
+.editor-read-view-skeleton > div {
+  min-height: 0;
+  padding: 2px 0;
+}
+
+.editor-edit-view {
+  min-width: 400px;
+  max-width: 400px;
+}
+
+.editor-edit-view >  div > div > div > div > div.ak-editor-content-area {
+  padding: 10px;
+  overflow: hidden;
+  cursor: text;
+}

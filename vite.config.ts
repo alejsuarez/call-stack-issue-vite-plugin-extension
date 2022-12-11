@@ -5,6 +5,7 @@ import zipPack from 'vite-plugin-zip-pack'
 import { resolve } from 'path'
 import { getManifest } from './src/manifest'
 import pkg from './package.json'
+import envCompatible from 'vite-plugin-env-compatible'
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -15,34 +16,24 @@ export default defineConfig(({ mode }) => {
   const browser = manifestVersion === 3 ? 'chrome' : 'firefox'
 
   return {
-    // I had to add this lines in order to get rid of an error appearing in both packages when building the extension
-    // '@atlaskit/emoji' and '@atlaskit/link-provider' which are peer dependencies of '@atlaskit/editor-core'
-    // The error was:
-    // 'LRUCache' is not exported by node_modules/.pnpm/lru-fast@0.2.2/node_modules/lru-fast/lru.js
-    build: {
-      rollupOptions: {
-        external: ['@atlaskit/emoji', '@atlaskit/link-provider', 'lru-fast']
-      }
-    },
-    // End of code added
     resolve: {
       alias: {
-        '~': resolve(__dirname, './src')
+        '~': resolve(__dirname, './src'),
+        'lru-fast/lru': 'lru-fast/lru.d.ts',
+        'lru-fast': 'lru-fast/lru.d.ts'
       }
     },
     plugins: [
       react({ jsxRuntime: 'classic' }),
       webExtension({
-        manifest: getManifest(manifestVersion)
+        manifest: getManifest(manifestVersion, mode)
       }),
       zipEnabled &&
         zipPack({
           outDir: 'releases',
           outFileName: `${browser}-release-${extensionVersion}.zip`
-        })
-    ],
-    define: {
-      'process.env': {}
-    }
+        }),
+      envCompatible()
+    ]
   }
 })

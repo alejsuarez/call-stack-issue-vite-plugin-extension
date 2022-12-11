@@ -1,20 +1,25 @@
 import pkg from '../package.json'
 
-const sharedManifest = {
-  content_scripts: [
-    {
-      js: ['src/entries/contentScript/primary/main.tsx'],
-      matches: ['https://*.atlassian.net/*', 'https://*.jira.com/*'],
-      run_at: 'document_end',
-      all_frames: true
-    }
-  ],
-  icons: {
-    16: 'icons/icon.png',
-    48: 'icons/icon.png',
-    128: 'icons/icon.png'
-  },
-  permissions: []
+const getSharedManifest = (mode: string) => {
+  const isDevMode = mode === 'development'
+
+  return {
+    content_scripts: [
+      {
+        js: ['src/entries/contentScript/primary/main.tsx'],
+        ...(!isDevMode && { css: ['src/entries/contentScript/primary/main.css'] }),
+        matches: ['https://*.blank.org/*'],
+        run_at: 'document_end',
+        all_frames: true
+      }
+    ],
+    icons: {
+      16: 'icons/icon.png',
+      48: 'icons/icon.png',
+      128: 'icons/icon.png'
+    },
+    permissions: []
+  }
 }
 
 const browserAction = {
@@ -22,19 +27,25 @@ const browserAction = {
   default_popup: 'src/entries/popup/index.html'
 }
 
-const ManifestV2 = {
-  ...sharedManifest,
-  browser_action: browserAction,
-  permissions: [...sharedManifest.permissions, '*://*/*']
+const ManifestV2 = (mode: string) => {
+  const sharedManifest = getSharedManifest(mode)
+  return {
+    ...sharedManifest,
+    browser_action: browserAction,
+    permissions: [...sharedManifest.permissions, '*://*/*']
+  }
 }
 
-const ManifestV3 = {
-  ...sharedManifest,
-  action: browserAction,
-  host_permissions: [...sharedManifest.permissions, '*://*/*']
+const ManifestV3 = (mode: string) => {
+  const sharedManifest = getSharedManifest(mode)
+  return {
+    ...sharedManifest,
+    action: browserAction,
+    host_permissions: [...sharedManifest.permissions, '*://*/*']
+  }
 }
 
-export function getManifest(manifestVersion: number): chrome.runtime.ManifestV2 | chrome.runtime.ManifestV3 {
+export function getManifest(manifestVersion: number, mode: string): chrome.runtime.ManifestV2 | chrome.runtime.ManifestV3 {
   const manifest = {
     author: pkg.author,
     description: pkg.description,
@@ -45,7 +56,7 @@ export function getManifest(manifestVersion: number): chrome.runtime.ManifestV2 
   if (manifestVersion === 2) {
     return {
       ...manifest,
-      ...ManifestV2,
+      ...ManifestV2(mode),
       manifest_version: manifestVersion
     }
   }
@@ -53,7 +64,7 @@ export function getManifest(manifestVersion: number): chrome.runtime.ManifestV2 
   if (manifestVersion === 3) {
     return {
       ...manifest,
-      ...ManifestV3,
+      ...ManifestV3(mode),
       manifest_version: manifestVersion
     }
   }
